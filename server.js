@@ -9,26 +9,34 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Database connection (abhi local PostgreSQL use karenge)
-// const pool = new Pool({
-// user: 'postgres',
-// host: 'localhost',
-// database: 'securehorizon',
-// password: 'password',
-// port: 5432,
-// });
-
+// Database connection
 const pool = new Pool({
   connectionString: 'postgresql://admin:W3twfr5FAHFJJoKp6XGDAk1ST86Bsl9Q@dpg-d8s24fj6sc1c73burdmg-a.oregon-postgres.render.com/securehorizon',
   ssl: { rejectUnauthorized: false }
 });
 
-// Test route
+// ============================================
+// ✅ TEST ROUTE
+// ============================================
 app.get('/', (req, res) => {
   res.json({ message: 'Secure Horizon Backend is Running! 🚀' });
 });
 
-// SIGNUP API
+// ============================================
+// ✅ GET ALL USERS (TEMPORARY - TESTING ONLY)
+// ============================================
+app.get('/api/users', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT id, email, created_at FROM users ORDER BY id DESC');
+    res.json({ success: true, users: result.rows });
+  } catch (err) {
+    res.json({ success: false, message: err.message });
+  }
+});
+
+// ============================================
+// ✅ SIGNUP API
+// ============================================
 app.post('/api/signup', async (req, res) => {
   const { email, password } = req.body;
   
@@ -52,7 +60,9 @@ app.post('/api/signup', async (req, res) => {
   }
 });
 
-// LOGIN API
+// ============================================
+// ✅ LOGIN API
+// ============================================
 app.post('/api/login', async (req, res) => {
   const { email, password } = req.body;
 
@@ -91,7 +101,9 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
-// Create users table if not exists
+// ============================================
+// ✅ CREATE USERS TABLE (if not exists)
+// ============================================
 const createTable = async () => {
   try {
     await pool.query(`
@@ -108,10 +120,12 @@ const createTable = async () => {
   }
 };
 
-// Call the function
 createTable();
 
-const PORT = 10000;
+// ============================================
+// ✅ START SERVER
+// ============================================
+const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
-  console.log(`✅ Server running on http://localhost:${PORT}`);
+  console.log(`✅ Server running on port ${PORT}`);
 });
